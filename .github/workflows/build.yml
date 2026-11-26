@@ -3,14 +3,18 @@ name: Build
 on:
   workflow_dispatch:
 
+env:
+  RELEASE: bookworm   # 'stable' (trixie) breaks setup.sh on libconfig9
+
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # ubuntu-22.04's debian-archive-keyring stops at bullseye; 24.04 ships the bookworm keys
+    runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: true
+          submodules: recursive
 
       - name: Install dependencies
         run: sudo sh -e scripts/install_deps.sh
@@ -22,7 +26,7 @@ jobs:
         run: sudo sh -e scripts/extract_fw.sh
 
       - name: Create rootfs
-        run: sudo sh -e scripts/debootstrap.sh
+        run: sudo --preserve-env=RELEASE sh -e scripts/debootstrap.sh
 
       - name: Build gadget-tool
         run: sudo sh -e scripts/build_gt.sh
@@ -30,8 +34,13 @@ jobs:
       - name: Create images
         run: sudo sh -e scripts/build_images.sh
 
+      - name: Add MF800 DTB and checksums
+        run: |
+          sudo cp dtbs/msm8916-fy-mf800.dtb files/
+          cd files && sudo sh -c 'sha256sum * > SHA256SUMS' && cat SHA256SUMS
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: openstick-debian
+          name: openstick-debian-fy-mf800
           path: files/*
