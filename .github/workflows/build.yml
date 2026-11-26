@@ -16,6 +16,11 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Drop runner's broken third-party apt repos
+        # packages.microsoft.com answers 403 / "no longer signed" and makes apt update fail
+        run: |
+          grep -ls packages.microsoft.com /etc/apt/sources.list.d/* | xargs -r sudo rm -fv
+
       - name: Install dependencies
         run: sudo sh -e scripts/install_deps.sh
 
