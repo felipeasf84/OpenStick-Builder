@@ -545,9 +545,11 @@
 
 	smsm {
 		compatible = "qcom,smsm";
+		/* kernel 6.6 qcom_smsm has no mailbox support (added in 75287992f58a, 2024-06): use qcom,ipc-N */
+		qcom,ipc-1 = <0x05 0x08 0x0d>;
+		qcom,ipc-3 = <0x05 0x08 0x13>;
 		#address-cells = <0x01>;
 		#size-cells = <0x00>;
-		mboxes = <0x00 0x05 0x0d 0x00 0x05 0x13>;
 
 		apps@0 {
 			reg = <0x00>;
@@ -2631,6 +2633,7 @@
 			reset-names = "core";
 			phy_type = "ulpi";
 			dr_mode = "otg";
+			usb-role-switch;
 			hnp-disable;
 			srp-disable;
 			adp-disable;
@@ -2639,7 +2642,7 @@
 			phys = <0x8d>;
 			status = "okay";
 			#reset-cells = <0x01>;
-			extcon = <0x58 0x8e>;
+			extcon = <0x58>;
 			phandle = <0x8f>;
 
 			ulpi {
@@ -3091,6 +3094,7 @@
 
 	usb-otg-hack {
 		compatible = "linux,extcon-usb-gpio";
+		status = "disabled";
 		id-gpios = <0x49 0x25 0x01>;
 		pinctrl-names = "default";
 		pinctrl-0 = <0x9f>;
