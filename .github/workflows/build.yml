@@ -26,7 +26,7 @@ jobs:
 
       - name: Build DTBs from source and check against committed binaries
         run: |
-          for f in dtbs/src/*.dts; do
+          for f in dtbs-src/*.dts; do
             out=/tmp/$(basename "${f%.dts}").dtb
             dtc -q -I dts -O dtb -o "$out" "$f"
             cmp "$out" "dtbs/$(basename "$out")" || { echo "dtbs/$(basename "$out") is stale vs $f"; exit 1; }
