@@ -1,0 +1,13 @@
+[Unit]
+Description=Turn on the board's gpio-leds at boot (MF800)
+After=sysinit.target
+
+[Service]
+Type=oneshot
+# Only physical LEDs from the gpio-leds node (/devices/platform/leds). Never touch
+# virtual LEDs such as mmc0:: (eMMC activity) — writing it hung the board once.
+ExecStart=/bin/sh -c 'for l in /sys/devices/platform/leds/leds/*; do [ -w "$l/brightness" ] && cat "$l/max_brightness" > "$l/brightness"; done'
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

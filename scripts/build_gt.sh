@@ -43,4 +43,8 @@ make -C build DESTDIR=$(pwd)/dist install
 rm -rf dist/usr/share dist/usr/lib/cmake dist/usr/lib/pkgconfig \
     dist/usr/lib/*a dist/usr/bin/ga* dist/usr/bin/s* dist/usr/include
 
+# libusbgx built here links against the runner's cross glibc (2.38+ __isoc23_* symbols);
+# ship only gt and use bookworm's libusbgx2 (same soname, all symbols gt needs)
+rm -f dist/usr/lib/libusbgx.so*
+
 cp -a configs/templates dist/etc/gt

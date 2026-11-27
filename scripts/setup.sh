@@ -17,7 +17,11 @@ apt install -qqy --no-install-recommends \
     dnsmasq \
     hostapd \
     iptables \
+    ca-certificates \
     libconfig9 \
+    libmbim-utils \
+    libqmi-utils \
+    libusbgx2 \
     locales \
     modemmanager \
     netcat-traditional \
@@ -31,6 +35,14 @@ apt install -qqy --no-install-recommends \
     tzdata \
     wireguard-tools \
     wpasupplicant
+
+# tailscale from the official repo (key pinned in configs/, fingerprint 2596A99EAAB33821893C0A79458CA832957F5868)
+echo 'deb [signed-by=/usr/share/keyrings/tailscale-archive-keyring.gpg] https://pkgs.tailscale.com/stable/debian bookworm main' \
+    > /etc/apt/sources.list.d/tailscale.list
+apt update -qqy
+apt install -qqy --no-install-recommends tailscale
+systemctl disable tailscaled
+
 apt clean
 rm -rf /var/lib/apt/lists/*
 

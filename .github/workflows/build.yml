@@ -36,6 +36,11 @@ jobs:
       - name: Build gadget-tool
         run: sudo sh -e scripts/build_gt.sh
 
+      - name: Check dist/ against bookworm glibc (2.36)
+        run: |
+          bad=$(find dist -type f -exec sh -c 'aarch64-linux-gnu-objdump -T "$1" 2>/dev/null | grep -E "GLIBC_2\.(3[7-9]|[4-9][0-9])" | sed "s|^|$1: |"' _ {} \;)
+          [ -z "$bad" ] || { echo "$bad"; exit 1; }
+
       - name: Create images
         run: sudo sh -e scripts/build_images.sh
 
