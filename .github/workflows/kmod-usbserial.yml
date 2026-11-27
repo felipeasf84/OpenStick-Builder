@@ -10,14 +10,14 @@ jobs:
     runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@v4
-      - name: Deps
+      - name: "Deps"
         run: sudo apt-get update -qq && sudo apt-get install -y -qq build-essential bc bison flex libssl-dev libelf-dev
-      - name: Fetch kernel source (tag v6.6-msm8916, tarball: no .git -> no '+' in kernelrelease)
+      - name: "Fetch kernel source (tag v6.6-msm8916, tarball: no .git -> no '+' in kernelrelease)"
         run: |
           curl -sSfL -o k.tar.gz https://github.com/msm8916-mainline/linux/archive/refs/tags/v6.6-msm8916.tar.gz
           sha256sum k.tar.gz
           mkdir linux && tar xzf k.tar.gz -C linux --strip-components=1
-      - name: Configure (device /proc/config.gz + USB_ACM/serial as modules, no gcc plugins)
+      - name: "Configure (device /proc/config.gz + USB_ACM/serial as modules, no gcc plugins)"
         working-directory: linux
         run: |
           cp ../kmod/config-6.6.0-msm8916 .config
@@ -26,14 +26,14 @@ jobs:
           make olddefconfig
           echo "--- config diff vs device:"; diff <(grep -v '^#' ../kmod/config-6.6.0-msm8916 | grep -vE 'CC_VERSION_TEXT|GCC_VERSION|AS_VERSION|LD_VERSION|PAHOLE_VERSION|CC_HAS|CC_CAN|AS_HAS|TOOLS_SUPPORT|GCC_PLUGINS|CONFIG_HAVE_|CONFIG_CC_IS|CONFIG_LD_IS|CONFIG_AS_IS|RUSTC|BINDGEN|=$' | sort) \
                                                  <(grep -v '^#' .config | grep -vE 'CC_VERSION_TEXT|GCC_VERSION|AS_VERSION|LD_VERSION|PAHOLE_VERSION|CC_HAS|CC_CAN|AS_HAS|TOOLS_SUPPORT|GCC_PLUGINS|CONFIG_HAVE_|CONFIG_CC_IS|CONFIG_LD_IS|CONFIG_AS_IS|RUSTC|BINDGEN|=$' | sort) || true
-      - name: modules_prepare + build modules
+      - name: "modules_prepare + build modules"
         working-directory: linux
         run: |
           make -j$(nproc) modules_prepare
           echo "kernelrelease: $(make -s kernelrelease)"
           make -j$(nproc) KBUILD_MODPOST_WARN=1 M=drivers/usb/class modules
           make -j$(nproc) KBUILD_MODPOST_WARN=1 M=drivers/usb/serial modules
-      - name: Collect + check vermagic
+      - name: "Collect + check vermagic"
         run: |
           mkdir out
           cp linux/drivers/usb/class/cdc-acm.ko linux/drivers/usb/serial/{usbserial,cp210x,ftdi_sio,ch341}.ko out/
