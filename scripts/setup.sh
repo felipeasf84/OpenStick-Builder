@@ -39,7 +39,13 @@ apt install -qqy --no-install-recommends \
 # tailscale from the official repo (key pinned in configs/, fingerprint 2596A99EAAB33821893C0A79458CA832957F5868)
 echo 'deb [signed-by=/usr/share/keyrings/tailscale-archive-keyring.gpg] https://pkgs.tailscale.com/stable/debian bookworm main' \
     > /etc/apt/sources.list.d/tailscale.list
-apt update -qqy
+# refresh only the tailscale list: a full re-read of the Debian indexes under qemu-user
+# intermittently fails with 'getline (12: Cannot allocate memory)'
+for i in 1 2 3; do
+    apt-get update -qq -o Dir::Etc::sourcelist=sources.list.d/tailscale.list \
+        -o Dir::Etc::sourceparts=- -o APT::Get::List-Cleanup=0 && break
+    [ $i = 3 ] && exit 1; sleep 5
+done
 apt install -qqy --no-install-recommends tailscale
 systemctl disable tailscaled
 
